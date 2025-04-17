@@ -1,6 +1,6 @@
 ﻿import { getOpenAIClient } from '../../config/services';
 import { Logger } from '../../utils/logger';
-import { retryWithBackoff } from '../../utils/retry';
+import { retryWithBackoff } from '../../utils/retry.js';
 
 // Types for content analysis
 interface ContentAnalysis {
@@ -415,6 +415,38 @@ Reference Frame: ${visualReference}`
     // Implementation would use a video generation service
     // This is a placeholder that would be implemented with actual video generation
     return `video-${platform}-${Date.now()}.mp4`;
+  }
+  
+  /**
+   * Extracts visual reference frames from the original lecture video
+   */
+  private async extractVisualReferences(
+    videoUrl: string,
+    timestamps: number[]
+  ): Promise<Record<number, string>> {
+    try {
+      this.logger.info('Extracting visual references', { videoUrl, timestamps });
+      
+      // Implementation would use a video processing service to extract frames
+      // For now, we'll return placeholder data
+      const references: Record<number, string> = {};
+      
+      for (const timestamp of timestamps) {
+        // In a real implementation, this would:
+        // 1. Use FFmpeg or similar to extract frames at specific timestamps
+        // 2. Process and store the frames
+        // 3. Return URLs or identifiers for the extracted frames
+        references[timestamp] = `frame-${timestamp}.jpg`;
+      }
+      
+      return references;
+    } catch (error) {
+      this.logger.error('Failed to extract visual references', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        videoUrl
+      });
+      throw error;
+    }
   }
   
   // Validation methods
