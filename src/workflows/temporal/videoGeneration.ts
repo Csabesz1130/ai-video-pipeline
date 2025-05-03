@@ -51,7 +51,7 @@ export async function videoGenerationWorkflow(
     thumbnailUrl: video.thumbnailUrl,
     platform: request.platforms[0],
     generationStats: {
-      executionTime: 0, // Will be calculated by Temporal
+      executionTime: "", // Will be calculated by Temporal
       scriptTokens: script.tokenCount,
       visualAssetCount: visuals.length
     }
@@ -64,5 +64,5 @@ export async function startVideoGenerationWorkflow(
 ): Promise<string> {
   // This would be implemented in the actual code to start the workflow
   // using the Temporal client
-  return workflow-; // Placeholder
+  return "workflow-started"; // Placeholder
 }
