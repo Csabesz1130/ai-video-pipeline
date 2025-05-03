@@ -1,7 +1,7 @@
 ﻿import express, { Express, Request, Response } from 'express';
 import { videoGenerationController } from './controllers/videoGenerationController';
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 
 export function startApiServer(app: Express): void {
   // Middleware

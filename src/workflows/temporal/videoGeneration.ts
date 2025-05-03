@@ -51,9 +51,9 @@ export async function videoGenerationWorkflow(
     thumbnailUrl: video.thumbnailUrl,
     platform: request.platforms[0],
     generationStats: {
-      executionTime: "", // Will be calculated by Temporal
-      scriptTokens: script.tokenCount,
-      visualAssetCount: visuals.length
+      executionTime: "0", // Will be calculated by Temporal
+      scriptTokens: Number(script.tokenCount),
+      visualAssetCount: Array.isArray(visuals) ? visuals.length : 0
     }
   };
 }

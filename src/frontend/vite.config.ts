@@ -11,5 +11,8 @@ export default defineConfig({
   },
   server: {
     port: 3000, // You can specify a port for the dev server
+    proxy: {
+      '/api': 'http://localhost:4000',
+    },
   }
 }) 
