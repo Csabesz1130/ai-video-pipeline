@@ -43,3 +43,22 @@ generated/
 # Misc
 .DS_Store
 Thumbs.db
+
+# TypeScript
+*.tsbuildinfo
+
+# Jest
+coverage/
+
+# IDE config files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Frontend specific
+src/frontend/node_modules/
+src/frontend/.vite/
