@@ -37,7 +37,7 @@ export class PlatformFormatter {
     platform: 'tiktok' | 'reels' | 'shorts',
     metadata: any
   ) {
-    console.log(Formatting video for );
+    // console.log(Formatting video for );
     
     const spec = this.platformSpecs[platform];
     

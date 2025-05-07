@@ -22,13 +22,13 @@ export class RunwayClient {
     duration?: number;
     consistency?: 'low' | 'medium' | 'high';
   }) {
-    console.log(Generating video with Runway: );
+    // console.log(Generating video with Runway: );
     
     // This would make an actual API call to Runway
     // For now, we just return a mock response
     
     return {
-      id: unway-,
+      id: 'runway-1',
       url: 'https://example.com/runway-video.mp4',
       prompt,
       durationSecs: duration
@@ -43,13 +43,11 @@ export class RunwayClient {
     styleReference?: string,
     characterReference?: any
   ) {
-    console.log(Generating  consistent video segments);
+    // console.log(Generating  consistent video segments);
     
     // Generate character prompts if reference provided
     const characterPrompts = characterReference
-      ? scriptSegments.map(segment => 
-          ${characterReference.description} 
-        )
+      ? scriptSegments.map(segment => `${characterReference.description}`)
       : scriptSegments.map(segment => segment.visualDescription);
     
     // Generate each segment

@@ -4,7 +4,7 @@
  * Analyzes current trends and generates a video brief
  */
 export async function analyzeTrends(request: VideoGenerationRequest) {
-  console.log(Analyzing trends for );
+  // console.log(Analyzing trends for );
   
   // This would call the ContentPlanningService to analyze trends
   // and generate a brief
@@ -31,13 +31,13 @@ export async function analyzeTrends(request: VideoGenerationRequest) {
  * Generates an optimized script for the video
  */
 export async function generateScript(brief: any) {
-  console.log(Generating script for );
+  // console.log(Generating script for );
   
   // This would call the ScriptGenerationService to create
   // a hook-optimized script
   
   return {
-    scriptText: This is a sample script for ,
+    scriptText: "This is a sample script for ...",
     hooks: {
       primary: 'Did you know that...',
       secondary: 'Here\'s why it matters...'
@@ -123,13 +123,13 @@ export async function generateAudio(script: any) {
  * Assembles the final video from components
  */
 export async function assembleVideo({ script, visuals, audio, platform }: any) {
-  console.log(Assembling video for );
+  // console.log(Assembling video for );
   
   // This would call the PlatformFormatterService to assemble
   // and format the video for the specific platform
   
   return {
-    id: ideo-,
+    id: 'video-1',
     url: 'https://example.com/final-video.mp4',
     thumbnailUrl: 'https://example.com/thumbnail.jpg',
     durationSecs: 16,
@@ -141,7 +141,7 @@ export async function assembleVideo({ script, visuals, audio, platform }: any) {
  * Distributes the video to selected platforms
  */
 export async function distributeContent(video: any, platforms: string[]) {
-  console.log(Distributing video to );
+  // console.log(Distributing video to );
   
   // This would call platform-specific APIs to upload and schedule
   // the video for distribution
