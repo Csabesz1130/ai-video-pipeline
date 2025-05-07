@@ -1,5 +1,5 @@
 ﻿import { OpenAI } from 'openai';
-import { Temporal } from '@temporalio/client';
+// import { Temporal } from '@temporalio/client';
 import AWS from 'aws-sdk';
 import { v2 as cloudinary } from 'cloudinary';
 
