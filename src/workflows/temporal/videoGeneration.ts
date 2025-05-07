@@ -51,7 +51,7 @@ export async function videoGenerationWorkflow(
     thumbnailUrl: video.thumbnailUrl,
     platform: request.platforms[0],
     generationStats: {
-      executionTime: "0", // Will be calculated by Temporal
+      executionTime: 0, // Will be calculated by Temporal
       scriptTokens: Number(script.tokenCount),
       visualAssetCount: Array.isArray(visuals) ? visuals.length : 0
     }
