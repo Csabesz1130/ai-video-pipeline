@@ -2,11 +2,12 @@
 // import { Temporal } from '@temporalio/client';
 import AWS from 'aws-sdk';
 import { v2 as cloudinary } from 'cloudinary';
+import { Connection, Client } from '@temporalio/client';
 
 // Service instances
 let openaiClient: OpenAI;
 let s3Client: AWS.S3;
-let temporalClient: Temporal.Client;
+let temporalClient: Client;
 
 export async function initializeServices(): Promise<void> {
   // Initialize OpenAI
@@ -30,9 +31,10 @@ export async function initializeServices(): Promise<void> {
   });
   
   // Initialize Temporal client
-  temporalClient = await Temporal.service.connect({
+  const connection = await Connection.connect({
     address: process.env.TEMPORAL_ADDRESS || 'localhost:7233'
   });
+  temporalClient = new Client({ connection });
   
   console.log('All services initialized successfully');
 }
@@ -46,6 +48,6 @@ export function getS3Client(): AWS.S3 {
   return s3Client;
 }
 
-export function getTemporalClient(): Temporal.Client {
+export function getTemporalClient(): Client {
   return temporalClient;
 }
