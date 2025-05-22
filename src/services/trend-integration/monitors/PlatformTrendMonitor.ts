@@ -1,3 +1,4 @@
+// corrected/src/services/trend-integration/monitors/PlatformTrendMonitor.ts
 import { EventEmitter } from 'events';
 import { Platform, Trend, TrendMonitoringError, TrendMonitoringErrorType } from '../types';
 import { Logger } from '../../../utils/logger';
@@ -39,40 +40,40 @@ export abstract class BasePlatformTrendMonitor extends EventEmitter {
     }
 
     this.logger.info(`Starting ${this.platform} trend monitoring`);
-    
+
     try {
       // Initialize platform-specific monitoring
       await this.initializeMonitoring();
-      
+
       // Set up polling interval
       this.isRunning = true;
       const pollingInterval = this.getPollingInterval();
-      
+
       // Perform initial fetch
       await this.pollTrends();
-      
+
       // Set up regular polling
       this.pollingIntervalId = setInterval(async () => {
         try {
           await this.pollTrends();
-        } catch (error) {
-          this.logger.error(`Error during ${this.platform} trend polling`, { error });
+        } catch (error: any) {
+          this.logger.error(`Error during ${this.platform} trend polling`, { error: error.message });
         }
       }, pollingInterval);
-      
+
       this.logger.info(`${this.platform} trend monitoring started successfully (polling every ${pollingInterval/1000}s)`);
-    } catch (error) {
+    } catch (error: any) {
       this.isRunning = false;
-      this.logger.error(`Failed to start ${this.platform} trend monitoring`, { error });
-      
+      this.logger.error(`Failed to start ${this.platform} trend monitoring`, { error: error.message });
+
       // Convert to standardized error
       const monitoringError = new TrendMonitoringError(
-        `Failed to start ${this.platform} monitoring: ${error.message}`,
+        `Failed to start ${this.platform} monitoring: ${error.message}`, // Used error.message
         TrendMonitoringErrorType.UNKNOWN_ERROR,
         this.platform,
         error
       );
-      
+
       throw monitoringError;
     }
   }
@@ -87,28 +88,28 @@ export abstract class BasePlatformTrendMonitor extends EventEmitter {
     }
 
     this.logger.info(`Stopping ${this.platform} trend monitoring`);
-    
+
     // Clear polling interval
     if (this.pollingIntervalId) {
       clearInterval(this.pollingIntervalId);
       this.pollingIntervalId = null;
     }
-    
+
     try {
       // Perform platform-specific cleanup
       await this.cleanupMonitoring();
       this.logger.info(`${this.platform} trend monitoring stopped successfully`);
-    } catch (error) {
-      this.logger.error(`Error during ${this.platform} monitoring cleanup`, { error });
-      
+    } catch (error: any) {
+      this.logger.error(`Error during ${this.platform} monitoring cleanup`, { error: error.message });
+
       // Convert to standardized error
       const monitoringError = new TrendMonitoringError(
-        `Failed to cleanly stop ${this.platform} monitoring: ${error.message}`,
+        `Failed to cleanly stop ${this.platform} monitoring: ${error.message}`, // Used error.message
         TrendMonitoringErrorType.UNKNOWN_ERROR,
         this.platform,
         error
       );
-      
+
       throw monitoringError;
     } finally {
       this.isRunning = false;
@@ -123,43 +124,51 @@ export abstract class BasePlatformTrendMonitor extends EventEmitter {
   }
 
   /**
+   * Public method to get current trends, fulfilling the interface.
+   */
+  public async getCurrentTrends(): Promise<Trend[]> {
+    return this.fetchTrends();
+  }
+
+  /**
    * Poll for new trends
    */
   private async pollTrends(): Promise<void> {
     try {
       const trends = await this.fetchTrends();
-      
+
       if (trends && trends.length > 0) {
         // Emit trends for consumers
         this.emit('trends', trends);
       }
-    } catch (error) {
+    } catch (error: any) {
       // Standardize error reporting
       let errorType = TrendMonitoringErrorType.UNKNOWN_ERROR;
-      
-      if (error.message?.includes('rate limit')) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+
+      if (errorMessage?.includes('rate limit')) { // Used errorMessage
         errorType = TrendMonitoringErrorType.RATE_LIMIT_ERROR;
-      } else if (error.message?.includes('authentication') || error.message?.includes('auth')) {
+      } else if (errorMessage?.includes('authentication') || errorMessage?.includes('auth')) { // Used errorMessage
         errorType = TrendMonitoringErrorType.AUTHENTICATION_ERROR;
-      } else if (error.message?.includes('timeout')) {
+      } else if (errorMessage?.includes('timeout')) { // Used errorMessage
         errorType = TrendMonitoringErrorType.TIMEOUT_ERROR;
-      } else if (error.message?.includes('connect') || error.message?.includes('network')) {
+      } else if (errorMessage?.includes('connect') || errorMessage?.includes('network')) { // Used errorMessage
         errorType = TrendMonitoringErrorType.CONNECTION_ERROR;
-      } else if (error.message?.includes('parse') || error.message?.includes('json')) {
+      } else if (errorMessage?.includes('parse') || errorMessage?.includes('json')) { // Used errorMessage
         errorType = TrendMonitoringErrorType.PARSING_ERROR;
       }
-      
+
       // Create standardized error
       const monitoringError = new TrendMonitoringError(
-        `Error fetching ${this.platform} trends: ${error.message}`,
+        `Error fetching ${this.platform} trends: ${errorMessage}`, // Used errorMessage
         errorType,
         this.platform,
         error
       );
-      
+
       // Emit error for consumers
       this.emit('error', monitoringError);
-      
+
       // Re-throw for internal handling
       throw monitoringError;
     }
@@ -189,4 +198,4 @@ export abstract class BasePlatformTrendMonitor extends EventEmitter {
    * and how quickly trends change on that platform
    */
   protected abstract getPollingInterval(): number;
-} 
+}

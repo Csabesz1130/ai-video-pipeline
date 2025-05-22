@@ -1,3 +1,4 @@
+// corrected/src/services/trend-integration/RealTimeTrendService.ts
 import { Platform, Trend, TrendAnalysis, TrendSchedule } from './types';
 import { BasePlatformTrendMonitor } from './monitors/PlatformTrendMonitor';
 import { TrendRelevanceAnalyzer } from './analysis/TrendRelevanceAnalyzer';
@@ -20,7 +21,7 @@ export class RealTimeTrendService {
     schedulingOptimizer: TrendSchedulingOptimizer
   ) {
     this.logger = new Logger('RealTimeTrendService');
-    this.monitors = new Map(monitors.map(monitor => [monitor.platformName, monitor]));
+    this.monitors = new Map(monitors.map(monitor => [monitor.getPlatform(), monitor])); // Changed platformName to getPlatform()
     this.relevanceAnalyzer = relevanceAnalyzer;
     this.incorporationEngine = incorporationEngine;
     this.schedulingOptimizer = schedulingOptimizer;
@@ -30,10 +31,10 @@ export class RealTimeTrendService {
   public async startMonitoring(): Promise<void> {
     try {
       this.logger.info('Starting trend monitoring across all platforms');
-      
+
       for (const monitor of this.monitors.values()) {
-        await monitor.startMonitoring();
-        monitor.subscribeToTrends(trends => this.handleNewTrends(trends));
+        await monitor.start(); // Changed startMonitoring to start
+        monitor.on('trends', (trends: Trend[]) => this.handleNewTrends(trends)); // Changed subscribeToTrends to on('trends', ...) and typed trends
       }
     } catch (error) {
       this.logger.error('Failed to start monitoring', {
@@ -46,11 +47,11 @@ export class RealTimeTrendService {
   public async stopMonitoring(): Promise<void> {
     try {
       this.logger.info('Stopping trend monitoring');
-      
+
       for (const monitor of this.monitors.values()) {
-        await monitor.stopMonitoring();
+        await monitor.stop(); // Changed stopMonitoring to stop
       }
-      
+
       this.activeTrends.clear();
     } catch (error) {
       this.logger.error('Failed to stop monitoring', {
@@ -83,7 +84,7 @@ export class RealTimeTrendService {
           continue;
         }
 
-        const trends = await monitor.getCurrentTrends();
+        const trends = await monitor.getCurrentTrends(); // Used new getCurrentTrends method
         const filteredTrends = await this.relevanceAnalyzer.filterTrends(trends, topic);
 
         for (const trend of filteredTrends) {
@@ -179,7 +180,7 @@ export class RealTimeTrendService {
         if (!this.activeTrends.has(trend.id)) {
           this.logger.info('New trend detected', { trend: trend.name });
           this.activeTrends.set(trend.id, trend);
-          
+
           // Start monitoring trend evolution
           await this.schedulingOptimizer.monitorTrendEvolution(trend);
         }
@@ -190,4 +191,4 @@ export class RealTimeTrendService {
       });
     }
   }
-} 
+}
