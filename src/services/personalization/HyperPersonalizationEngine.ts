@@ -6,19 +6,30 @@ import {
   VoiceConfig,
   MusicConfig,
   // VisualAsset removed as it's not defined/used
-} from './types';
-import { Logger } from '../../utils/logger';
+} from './types.js';
+import { Logger } from '../../utils/logger.js';
 // Assume these helper services exist and are properly typed
 // import { TTSService } from '../tts/TTSService';
 // import { MusicService } from '../music/MusicService';
 // import { VisualGenerationService } from '../visual-generation/VisualGenerationService';
 // import { VideoAssemblyService } from '../video-assembly/VideoAssemblyService';
 
-// Placeholder types for injected services
-type TTSService = any;
-type MusicService = any;
-type VisualGenerationService = any;
-type VideoAssemblyService = any;
+// Define proper service types
+interface TTSService {
+  getOrGenerateVoiceover(script: string, config: VoiceConfig, jobId: string): Promise<string | null>;
+}
+
+interface MusicService {
+  selectMusic(genre: string | undefined, mood: string | undefined, duration: number, jobId: string): Promise<string | null>;
+}
+
+interface VisualGenerationService {
+  generateSingleVisual(prompt: string, style: Record<string, unknown>, jobId: string, sceneId: string): Promise<string | null>;
+}
+
+interface VideoAssemblyService {
+  assembleVideo(config: BaseVideoConfig, jobId: string): Promise<{ url: string } | null>;
+}
 
 /**
  * Generates multiple variations of a single video concept tailored
@@ -101,7 +112,7 @@ export class HyperPersonalizationEngine {
         personalizedConfig.audio.baseVoice = newVoiceConfig; // Corrected to baseVoice
 
         // Determine the script text to use (might be modified by CTA later)
-        let scriptTextForVoiceover = personalizedConfig.script.fullText; // Corrected to fullText
+        const scriptTextForVoiceover = personalizedConfig.script.fullText; // Corrected to fullText
         // TODO: Add logic here to handle potential CTA text changes affecting the main script text
         // Example: if (segment.rules.cta?.text) { scriptTextForVoiceover = updateScriptWithCTA(...) }
 
@@ -152,9 +163,11 @@ export class HyperPersonalizationEngine {
               }
               this.logger.info(`Replaced visual ${index} with URL for ${segment.id}`);
             } else if (visualOverride.replacementValue && visualOverride.type === 'regenerate_prompt') { // Check replacementValue and type
+              const styleRef = personalizedConfig.visualPlan.styleReference;
+              const styleParam = typeof styleRef === 'object' && styleRef !== null ? styleRef : {};
               const newVisualPath = await this.visualGenerationService.generateSingleVisual(
                 visualOverride.replacementValue, // Use replacementValue as prompt
-                personalizedConfig.visualPlan.styleReference, // Corrected path
+                styleParam, // Ensure it's always a Record<string, unknown>
                 variantJobId,
                 `scene_${index}`
               );
@@ -226,7 +239,7 @@ export class HyperPersonalizationEngine {
     return `/path/to/selected/music_${jobId}_${genre || 'default'}.mp3`;
   }
 
-  private async placeholderGenerateSingleVisual(prompt: string, style: any, jobId: string, sceneId: string): Promise<string | null> {
+  private async placeholderGenerateSingleVisual(prompt: string, style: Record<string, unknown>, jobId: string, sceneId: string): Promise<string | null> {
     this.logger.debug('[Placeholder] Generating visual', { jobId, sceneId, prompt });
     await new Promise(res => setTimeout(res, 300));
     return `/path/to/generated/visual_${jobId}_${sceneId}.png`;

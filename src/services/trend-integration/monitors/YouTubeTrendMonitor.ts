@@ -1,6 +1,5 @@
-import { Platform, Trend } from '../types';
+import { Trend } from '../types';
 import { BasePlatformTrendMonitor } from './PlatformTrendMonitor';
-import { Logger } from '../../../utils/logger';
 import { retryWithBackoff } from '../../../utils/retry';
 
 export class YouTubeTrendMonitor extends BasePlatformTrendMonitor {

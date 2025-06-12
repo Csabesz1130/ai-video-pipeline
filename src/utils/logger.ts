@@ -1,5 +1,3 @@
-import { format } from 'util';
-
 export class Logger {
   private readonly context: string;
 

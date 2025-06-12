@@ -1,7 +1,3 @@
-import { Logger } from './logger';
-
-const logger = new Logger('Retry');
-
 /**
  * Options for the retry with backoff function
  */
@@ -31,7 +27,7 @@ interface RetryOptions {
    * @param error The error that occurred
    * @returns true if the operation should be retried, false otherwise
    */
-  shouldRetry?: (error: any) => boolean;
+  shouldRetry?: (error: Error) => boolean;
   
   /**
    * Function to log retry attempts
@@ -39,7 +35,7 @@ interface RetryOptions {
    * @param error Error that triggered the retry
    * @param delayMs Delay before next retry in milliseconds
    */
-  onRetry?: (attempt: number, error: any, delayMs: number) => void;
+  onRetry?: (attempt: number, error: Error, delayMs: number) => void;
 }
 
 /**
@@ -72,19 +68,19 @@ export async function retryWithBackoff<T>(
   };
   
   let attempt = 0;
-  let lastError: any;
+  let lastError: Error = new Error('Retry exhausted');
   
   while (attempt <= config.maxRetries) {
     try {
       // Attempt the operation
       return await operation();
     } catch (error) {
-      lastError = error;
+      lastError = error instanceof Error ? error : new Error(String(error));
       attempt++;
       
       // If we've used all retries or shouldn't retry this error, rethrow
-      if (attempt > config.maxRetries || !config.shouldRetry(error)) {
-        throw error;
+      if (attempt > config.maxRetries || !config.shouldRetry(lastError)) {
+        throw lastError;
       }
       
       // Calculate delay with exponential backoff
@@ -94,7 +90,7 @@ export async function retryWithBackoff<T>(
       );
       
       // Call the onRetry callback
-      config.onRetry(attempt, error, delayMs);
+      config.onRetry(attempt, lastError, delayMs);
       
       // Wait before retrying
       await new Promise(resolve => setTimeout(resolve, delayMs));
@@ -121,7 +117,7 @@ export async function retryWithBackoffOrDefault<T>(
 ): Promise<T> {
   try {
     return await retryWithBackoff(operation, options);
-  } catch (error) {
+  } catch (_error) {
     return defaultValue;
   }
 } 
