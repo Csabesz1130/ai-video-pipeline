@@ -450,23 +450,23 @@ Reference Frame: ${visualReference}`
   }
   
   // Validation methods
-  private validateContentAnalysis(analysis: any): asserts analysis is ContentAnalysis {
+  private validateContentAnalysis(analysis: unknown): asserts analysis is ContentAnalysis {
     // Implementation would validate the structure and types
   }
   
-  private validateVideoSegments(segments: any): asserts segments is VideoSegment[] {
+  private validateVideoSegments(segments: unknown): asserts segments is VideoSegment[] {
     // Implementation would validate the structure and types
   }
   
-  private validateContentBrief(brief: any): asserts brief is ContentBrief {
+  private validateContentBrief(brief: unknown): asserts brief is ContentBrief {
     // Implementation would validate the structure and types
   }
   
-  private validateEducationalScript(script: any): asserts script is EducationalScript {
+  private validateEducationalScript(script: unknown): asserts script is EducationalScript {
     // Implementation would validate the structure and types
   }
   
-  private validateVisualPlan(plan: any): asserts plan is VisualPlan {
+  private validateVisualPlan(plan: unknown): asserts plan is VisualPlan {
     // Implementation would validate the structure and types
   }
 }
