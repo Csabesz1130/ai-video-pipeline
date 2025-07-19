@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -6,19 +6,17 @@ import { Textarea } from './ui/textarea';
 import { Progress } from './ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Upload, Play, Settings, FileVideo, Sparkles, Download } from 'lucide-react';
-
-interface VideoConfig {
-  platform: string;
-  duration: string;
-  style: string;
-  language: string;
-}
+import { FileUpload } from './ui/file-upload';
+import { JobManager } from './JobManager';
+import { SettingsManager } from './SettingsManager';
+import { Upload, Play, Settings, FileVideo, Sparkles, Download, AlertCircle, CheckCircle } from 'lucide-react';
+import { VideoConfig, VideoJob, apiService } from '../lib/api';
 
 interface ProcessingStatus {
   isProcessing: boolean;
   progress: number;
   currentStep: string;
+  jobId?: string;
 }
 
 export function VideoPipeline() {
@@ -26,7 +24,8 @@ export function VideoPipeline() {
     platform: 'tiktok',
     duration: '60',
     style: 'trendy',
-    language: 'english'
+    language: 'english',
+    quality: 'high'
   });
 
   const [status, setStatus] = useState<ProcessingStatus>({
@@ -37,45 +36,122 @@ export function VideoPipeline() {
 
   const [script, setScript] = useState('');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [currentJob, setCurrentJob] = useState<VideoJob | null>(null);
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setUploadedFile(file);
+  // Poll for job updates when processing
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+
+    if (status.isProcessing && status.jobId) {
+      interval = setInterval(async () => {
+        try {
+          const job = await apiService.mockGetVideoJob(status.jobId!);
+          setCurrentJob(job);
+          
+          setStatus(prev => ({
+            ...prev,
+            progress: job.progress,
+            currentStep: job.currentStep,
+            isProcessing: job.status === 'pending' || job.status === 'processing'
+          }));
+
+          if (job.status === 'completed' || job.status === 'failed') {
+            setStatus(prev => ({ ...prev, isProcessing: false }));
+            if (interval) clearInterval(interval);
+          }
+        } catch (err) {
+          console.error('Failed to update job status:', err);
+        }
+      }, 2000);
     }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [status.isProcessing, status.jobId]);
+
+  const handleFileSelect = (file: File) => {
+    setUploadedFile(file);
+    setMessage(null);
+  };
+
+  const handleFileRemove = () => {
+    setUploadedFile(null);
   };
 
   const handleGenerateVideo = async () => {
-    setStatus({
-      isProcessing: true,
-      progress: 0,
-      currentStep: 'Initializing video generation...'
-    });
-
-    // Simulate processing steps
-    const steps = [
-      'Analyzing content...',
-      'Generating script...',
-      'Creating video scenes...',
-      'Adding effects and transitions...',
-      'Rendering final video...',
-      'Optimizing for platform...'
-    ];
-
-    for (let i = 0; i < steps.length; i++) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setStatus(prev => ({
-        ...prev,
-        progress: ((i + 1) / steps.length) * 100,
-        currentStep: steps[i]
-      }));
+    if (!script.trim() && !uploadedFile) {
+      setMessage({
+        type: 'error',
+        text: 'Please provide a script or upload a file'
+      });
+      return;
     }
 
-    setStatus(prev => ({
-      ...prev,
+    try {
+      setMessage(null);
+      setStatus({
+        isProcessing: true,
+        progress: 0,
+        currentStep: 'Creating video job...'
+      });
+
+      // Create video job
+      const videoConfig: VideoConfig = {
+        ...config,
+        script: script.trim() || undefined
+      };
+
+      const job = await apiService.mockCreateVideoJob(videoConfig, uploadedFile || undefined);
+      setCurrentJob(job);
+      
+      setStatus({
+        isProcessing: true,
+        progress: 0,
+        currentStep: 'Job created, starting processing...',
+        jobId: job.id
+      });
+
+      setMessage({
+        type: 'success',
+        text: `Video job created successfully! Job ID: ${job.id}`
+      });
+
+    } catch (err) {
+      setStatus({
+        isProcessing: false,
+        progress: 0,
+        currentStep: ''
+      });
+      setMessage({
+        type: 'error',
+        text: err instanceof Error ? err.message : 'Failed to create video job'
+      });
+    }
+  };
+
+  const downloadVideo = () => {
+    if (currentJob?.outputUrl) {
+      const link = document.createElement('a');
+      link.href = currentJob.outputUrl;
+      link.download = `video_${currentJob.id}.mp4`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  const resetForm = () => {
+    setScript('');
+    setUploadedFile(null);
+    setStatus({
       isProcessing: false,
-      currentStep: 'Video generation complete!'
-    }));
+      progress: 0,
+      currentStep: ''
+    });
+    setCurrentJob(null);
+    setMessage(null);
   };
 
   return (
@@ -93,13 +169,29 @@ export function VideoPipeline() {
         </div>
 
         <Tabs defaultValue="create" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="create">Create Video</TabsTrigger>
+            <TabsTrigger value="jobs">My Jobs</TabsTrigger>
             <TabsTrigger value="upload">Upload Content</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
           <TabsContent value="create" className="space-y-6">
+            {message && (
+              <Card className={`border-${message.type === 'error' ? 'destructive' : 'green-200'}`}>
+                <CardContent className="p-4">
+                  <div className={`flex items-center ${message.type === 'error' ? 'text-destructive' : 'text-green-600'}`}>
+                    {message.type === 'error' ? (
+                      <AlertCircle className="h-4 w-4 mr-2" />
+                    ) : (
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                    )}
+                    {message.text}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Configuration Panel */}
               <Card>
@@ -172,6 +264,20 @@ export function VideoPipeline() {
                       </SelectContent>
                     </Select>
                   </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Quality</label>
+                    <Select value={config.quality} onValueChange={(value: string) => setConfig(prev => ({ ...prev, quality: value }))}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="low">Low (Fast)</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="high">High (Slow)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </CardContent>
               </Card>
 
@@ -199,29 +305,13 @@ export function VideoPipeline() {
 
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Upload Media (Optional)</label>
-                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
-                      <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground mb-2">
-                        Drop your video, image, or audio files here
-                      </p>
-                      <Input
-                        type="file"
-                        accept="video/*,image/*,audio/*"
-                        onChange={handleFileUpload}
-                        className="hidden"
-                        id="file-upload"
-                      />
-                      <Button variant="outline" asChild>
-                        <label htmlFor="file-upload">
-                          Choose Files
-                        </label>
-                      </Button>
-                    </div>
-                    {uploadedFile && (
-                      <p className="text-sm text-muted-foreground">
-                        Uploaded: {uploadedFile.name}
-                      </p>
-                    )}
+                    <FileUpload
+                      onFileSelect={handleFileSelect}
+                      onFileRemove={handleFileRemove}
+                      acceptedTypes={['video/*', 'image/*', 'audio/*']}
+                      maxSize={100}
+                      disabled={status.isProcessing}
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -230,26 +320,42 @@ export function VideoPipeline() {
             {/* Generate Button */}
             <Card>
               <CardContent className="pt-6">
-                <Button 
-                  onClick={handleGenerateVideo}
-                  disabled={status.isProcessing}
-                  className="w-full h-12 text-lg"
-                  size="lg"
-                >
-                  {status.isProcessing ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                      Generating Video...
-                    </>
-                  ) : (
-                    <>
-                      <Play className="h-5 w-5 mr-2" />
-                      Generate Video
-                    </>
+                <div className="flex gap-4">
+                  <Button 
+                    onClick={handleGenerateVideo}
+                    disabled={status.isProcessing}
+                    className="flex-1 h-12 text-lg"
+                    size="lg"
+                  >
+                    {status.isProcessing ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                        Generating Video...
+                      </>
+                    ) : (
+                      <>
+                        <Play className="h-5 w-5 mr-2" />
+                        Generate Video
+                      </>
+                    )}
+                  </Button>
+                  
+                  {!status.isProcessing && (script || uploadedFile) && (
+                    <Button 
+                      onClick={resetForm}
+                      variant="outline"
+                      size="lg"
+                    >
+                      Reset
+                    </Button>
                   )}
-                </Button>
+                </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="jobs" className="space-y-6">
+            <JobManager />
           </TabsContent>
 
           <TabsContent value="upload" className="space-y-6">
@@ -261,51 +367,19 @@ export function VideoPipeline() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-12 text-center">
-                  <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-lg font-medium mb-2">Upload your video</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Drag and drop your video files here or click to browse
-                  </p>
-                  <Button variant="outline">
-                    Choose Files
-                  </Button>
-                </div>
+                <FileUpload
+                  onFileSelect={handleFileSelect}
+                  onFileRemove={handleFileRemove}
+                  acceptedTypes={['video/*']}
+                  maxSize={500}
+                  multiple={true}
+                />
               </CardContent>
             </Card>
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Pipeline Settings</CardTitle>
-                <CardDescription>
-                  Configure your AI video pipeline preferences
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">API Key</label>
-                  <Input type="password" placeholder="Enter your API key" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Output Quality</label>
-                  <Select defaultValue="high">
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="low">Low (Fast)</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="high">High (Slow)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button variant="outline" className="w-full">
-                  Save Settings
-                </Button>
-              </CardContent>
-            </Card>
+            <SettingsManager />
           </TabsContent>
         </Tabs>
 
@@ -326,7 +400,7 @@ export function VideoPipeline() {
         )}
 
         {/* Results */}
-        {!status.isProcessing && status.progress === 100 && (
+        {!status.isProcessing && currentJob?.status === 'completed' && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -339,12 +413,45 @@ export function VideoPipeline() {
             </CardHeader>
             <CardContent>
               <div className="flex gap-4">
-                <Button className="flex-1">
+                <Button className="flex-1" onClick={downloadVideo}>
                   <Download className="h-4 w-4 mr-2" />
                   Download Video
                 </Button>
                 <Button variant="outline" className="flex-1">
                   Share to Platform
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Error Results */}
+        {!status.isProcessing && currentJob?.status === 'failed' && (
+          <Card className="border-destructive">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-destructive">
+                <AlertCircle className="h-5 w-5" />
+                Video Generation Failed
+              </CardTitle>
+              <CardDescription>
+                {currentJob.error || 'An error occurred during video generation'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-4">
+                <Button 
+                  onClick={handleGenerateVideo}
+                  className="flex-1"
+                >
+                  <Play className="h-4 w-4 mr-2" />
+                  Retry Generation
+                </Button>
+                <Button 
+                  onClick={resetForm}
+                  variant="outline" 
+                  className="flex-1"
+                >
+                  Start Over
                 </Button>
               </div>
             </CardContent>
