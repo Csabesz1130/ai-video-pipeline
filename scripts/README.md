@@ -1,57 +1,124 @@
-# AI Video Pipeline Advanced Debugger
+# AI Video Pipeline Advanced Debugging Suite
 
-A comprehensive debugging tool that helps identify issues quickly across your AI video pipeline application.
+A comprehensive debugging, monitoring, and analysis suite that helps identify issues quickly across your AI video pipeline application. This toolkit includes health checking, performance profiling, security scanning, and integrated monitoring.
 
 ## 🚀 Quick Start
 
 ```bash
-# Run the main debugger
-npm run debug
+# 🎯 RECOMMENDED: Comprehensive analysis dashboard
+npm run debug:dashboard
 
-# Run advanced TypeScript debugger directly
-npm run debug:advanced
+# Individual tools
+npm run debug                    # Basic health check
+npm run debug:performance        # Performance profiling
+npm run debug:security          # Security scanning
+npm run debug:advanced          # Advanced health check
 
-# Quick health check (minimal dependencies)
-npm run debug:quick
+# Quick checks
+npm run debug:quick             # Minimal health check
+npm run debug:all               # Same as dashboard
+
+# Production monitoring
+npm run monitor                 # Start continuous monitoring
+npm run monitor:check           # Single health check
 ```
 
-## 🔍 What It Checks
+## 🔍 What It Analyzes
 
-### 🌍 Environment Variables
-- **Required**: OpenAI API key, AWS credentials, Cloudinary credentials
-- **Optional**: Social media platform APIs (YouTube, TikTok, Twitter, Instagram)
-- **Temporal**: Workflow engine connection settings
+### 🏥 Health Monitoring
+- **Environment Variables**: Required/optional API keys and configuration
+- **Project Structure**: Core files, directories, and dependencies
+- **Service Connectivity**: OpenAI, AWS S3, Cloudinary, Temporal connections
+- **Build Process**: TypeScript compilation and frontend builds
+- **System Resources**: Ports, disk space, memory usage
+- **Application Health**: Syntax validation and runtime checks
 
-### 📁 Project Structure
-- Core files: `package.json`, `tsconfig.json`, main entry points
-- Directory structure: `src/`, `src/api/`, `src/services/`, etc.
-- Frontend structure: React components and Vite configuration
+### ⚡ Performance Profiling
+- **System Resources**: CPU, memory, and disk usage monitoring
+- **Node.js Performance**: Heap memory, event loop lag, V8 compilation
+- **I/O Performance**: File read/write speeds and throughput
+- **Network Performance**: DNS resolution, HTTP response times
+- **Benchmarking**: CPU, JSON processing, regex, array operations
+- **System Limits**: File descriptors, process limits
 
-### 📦 Dependencies
-- Critical packages: Express, OpenAI, AWS SDK, Cloudinary, Temporal, React, Vite
-- Installation verification: Checks if packages are actually installed
-- Version compatibility checks
+### 🔒 Security Scanning
+- **Dependency Vulnerabilities**: NPM audit and known CVEs
+- **Source Code Analysis**: Hardcoded secrets, injection vulnerabilities
+- **Environment Security**: Sensitive data exposure checks
+- **File Permissions**: Overly permissive files
+- **Network Security**: HTTPS usage, CORS configuration
+- **Authentication**: JWT/session secret strength
+- **Input Validation**: Request size limits, query safety
 
-### 🔗 Service Connectivity
-- **OpenAI**: API connection and available models
-- **AWS S3**: Bucket access and permissions
-- **Cloudinary**: Image/video service availability
-- **Temporal**: Workflow engine connectivity
+### 📊 Integrated Dashboard
+- **Unified Analysis**: Combines health, performance, and security
+- **HTML Reports**: Beautiful, interactive web reports
+- **Risk Assessment**: Overall system health scoring
+- **Actionable Recommendations**: Prioritized improvement suggestions
+- **Next Steps**: Clear action plans based on findings
 
-### 🔨 Build Process
-- **TypeScript**: Compilation without errors
-- **Frontend**: Vite build process and output verification
-- **Output**: Dist directory structure validation
+## 🛠️ Tool Suite Overview
 
-### 🚪 System Resources
-- **Ports**: Availability of common ports (3000, 4000, 7233, 8080)
-- **Disk Space**: Available storage and usage warnings
-- **Memory**: Current usage and availability
+### 🔍 `debug-dashboard.ts` - Master Dashboard (RECOMMENDED)
+The ultimate debugging tool that combines all analysis into a single, comprehensive report.
 
-### 📋 Logging & Health
-- Log file discovery and analysis
-- Application syntax validation
-- Runtime health checks
+**Features:**
+- Runs health, performance, and security analysis in parallel
+- Generates beautiful HTML reports with interactive visualizations
+- Provides overall system health score (0-100%)
+- Actionable recommendations and next steps
+- Can be customized to run specific analysis modules
+
+**Usage:**
+```bash
+npm run debug:dashboard
+
+# Customize analysis
+npx ts-node scripts/debug-dashboard.ts --no-performance  # Skip performance
+npx ts-node scripts/debug-dashboard.ts --no-security     # Skip security
+npx ts-node scripts/debug-dashboard.ts --no-html         # Skip HTML report
+```
+
+### 🏥 `debug.ts` - Advanced Health Checker
+Comprehensive health monitoring for all application components.
+
+**Checks:**
+- Environment variables and configuration
+- Project structure and dependencies
+- Service connectivity (OpenAI, AWS, Cloudinary, Temporal)
+- Build processes and compilation
+- System resources and availability
+
+### ⚡ `performance-profiler.ts` - Performance Analyzer
+Deep performance analysis and benchmarking.
+
+**Measures:**
+- System resource usage (CPU, memory, disk)
+- Node.js specific metrics (heap, event loop, V8)
+- I/O performance (file read/write speeds)
+- Network performance (DNS, HTTP response times)
+- Performance benchmarks (CPU, JSON, regex, arrays)
+
+### 🔒 `security-scanner.ts` - Security Vulnerability Scanner
+Comprehensive security analysis to identify vulnerabilities.
+
+**Scans for:**
+- Dependency vulnerabilities and CVEs
+- Hardcoded secrets and credentials
+- Code injection vulnerabilities
+- File permission issues
+- Network security misconfigurations
+- Authentication weaknesses
+
+### 📊 `monitor.ts` - Production Monitor
+Continuous monitoring for production environments.
+
+**Features:**
+- Periodic health checks with configurable intervals
+- Automatic retry logic with exponential backoff
+- Alert system with webhook support (Slack, Discord, etc.)
+- Health history tracking and analysis
+- Graceful shutdown handling
 
 ## 📊 Output Format
 
