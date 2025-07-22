@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { VideoGenerationForm } from "./VideoGenerationForm"
+import { VideoGenerationFormSimple } from "./VideoGenerationFormSimple"
 import { VideoGenerationRequest } from "../../../lib/types/videoRequest"
 
 export function VideoGenerationFormExample() {
@@ -32,7 +32,7 @@ export function VideoGenerationFormExample() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <VideoGenerationForm 
+      <VideoGenerationFormSimple 
         onSubmit={handleSubmit} 
         isSubmitting={isSubmitting}
       />

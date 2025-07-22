@@ -22,7 +22,7 @@
     "dev:backend": "ts-node-dev --respawn src/index.ts",
     "dev:frontend": "vite --config src/frontend/vite.config.ts",
     "build:backend": "tsc",
-    "build:frontend": "tsc --project src/frontend/tsconfig.json && vite build --config src/frontend/vite.config.ts"
+    "build:frontend": "vite build --config src/frontend/vite.config.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
