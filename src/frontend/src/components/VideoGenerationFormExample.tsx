@@ -31,20 +31,37 @@ export function VideoGenerationFormExample() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="w-full">
       <VideoGenerationFormSimple 
         onSubmit={handleSubmit} 
         isSubmitting={isSubmitting}
       />
       
       {submittedData && (
-        <div className="max-w-2xl mx-auto mt-8 p-6 bg-green-50 border border-green-200 rounded-lg">
+        <div className="max-w-2xl mx-auto mt-8 p-4 sm:p-6 bg-green-50 border border-green-200 rounded-lg">
           <h3 className="text-lg font-semibold text-green-800 mb-2">
-            Video Generation Request Submitted!
+            🎉 Video Generation Request Submitted!
           </h3>
-          <pre className="text-sm text-green-700 bg-green-100 p-3 rounded overflow-x-auto">
-            {JSON.stringify(submittedData, null, 2)}
-          </pre>
+          <div className="bg-green-100 rounded-lg p-3 overflow-hidden">
+            <div className="text-sm text-green-700">
+              <div className="mb-2"><strong>Topic:</strong> {submittedData.topic}</div>
+              <div className="mb-2"><strong>Platforms:</strong> {submittedData.platforms.join(", ")}</div>
+              {submittedData.style && (
+                <div className="mb-2"><strong>Style:</strong> {submittedData.style}</div>
+              )}
+              {submittedData.targetAudience && (
+                <div className="mb-2"><strong>Target Audience:</strong> {submittedData.targetAudience}</div>
+              )}
+            </div>
+            <details className="mt-3">
+              <summary className="text-xs text-green-600 cursor-pointer hover:text-green-700">
+                View Raw JSON
+              </summary>
+              <pre className="text-xs text-green-600 mt-2 overflow-x-auto">
+                {JSON.stringify(submittedData, null, 2)}
+              </pre>
+            </details>
+          </div>
         </div>
       )}
     </div>
