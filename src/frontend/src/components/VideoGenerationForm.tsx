@@ -3,6 +3,8 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Progress } from './ui/progress';
+import { Input } from './ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { 
   Play, 
   Settings, 
@@ -161,12 +163,10 @@ export function VideoGenerationForm({ onSubmit, isGenerating = false, progress =
             <TabsContent value="content" className="space-y-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Topic *</label>
-                <input
-                  type="text"
+                <Input
                   placeholder="Enter your video topic (e.g., 'AI in healthcare', 'Cooking tips', 'Tech trends')"
                   value={formData.topic}
                   onChange={(e) => handleInputChange('topic', e.target.value)}
-                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                   required
                 />
               </div>
@@ -177,18 +177,21 @@ export function VideoGenerationForm({ onSubmit, isGenerating = false, progress =
                     <Users className="h-4 w-4" />
                     Target Audience
                   </label>
-                  <select
+                  <Select
                     value={formData.targetAudience}
-                    onChange={(e) => handleInputChange('targetAudience', e.target.value)}
-                    className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                    onValueChange={(value) => handleInputChange('targetAudience', value)}
                   >
-                    <option value="">Select audience</option>
-                    <option value="teens">Teens (13-17)</option>
-                    <option value="young-adults">Young Adults (18-25)</option>
-                    <option value="adults">Adults (26-40)</option>
-                    <option value="professionals">Professionals</option>
-                    <option value="general">General Audience</option>
-                  </select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select audience" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="teens">Teens (13-17)</SelectItem>
+                      <SelectItem value="young-adults">Young Adults (18-25)</SelectItem>
+                      <SelectItem value="adults">Adults (26-40)</SelectItem>
+                      <SelectItem value="professionals">Professionals</SelectItem>
+                      <SelectItem value="general">General Audience</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
@@ -196,27 +199,29 @@ export function VideoGenerationForm({ onSubmit, isGenerating = false, progress =
                     <Clock className="h-4 w-4" />
                     Duration (seconds)
                   </label>
-                  <select
-                    value={formData.duration}
-                    onChange={(e) => handleInputChange('duration', parseInt(e.target.value))}
-                    className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  <Select
+                    value={formData.duration?.toString()}
+                    onValueChange={(value) => handleInputChange('duration', parseInt(value))}
                   >
-                    <option value={15}>15 seconds</option>
-                    <option value={30}>30 seconds</option>
-                    <option value={60}>1 minute</option>
-                    <option value={90}>1.5 minutes</option>
-                  </select>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="15">15 seconds</SelectItem>
+                      <SelectItem value="30">30 seconds</SelectItem>
+                      <SelectItem value="60">1 minute</SelectItem>
+                      <SelectItem value="90">1.5 minutes</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-medium">Content Style</label>
-                <input
-                  type="text"
+                <Input
                   placeholder="e.g., 'Educational', 'Entertaining', 'Inspirational', 'Tutorial'"
                   value={formData.style}
                   onChange={(e) => handleInputChange('style', e.target.value)}
-                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
 
@@ -285,28 +290,29 @@ export function VideoGenerationForm({ onSubmit, isGenerating = false, progress =
                     <Palette className="h-4 w-4" />
                     Color Scheme
                   </label>
-                  <select
+                  <Select
                     value={formData.visualPreferences?.colorScheme}
-                    onChange={(e) => handleNestedChange('visualPreferences', 'colorScheme', e.target.value)}
-                    className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                    onValueChange={(value) => handleNestedChange('visualPreferences', 'colorScheme', value)}
                   >
-                    <option value="">Auto-select</option>
-                    <option value="vibrant">Vibrant & Energetic</option>
-                    <option value="calm">Calm & Professional</option>
-                    <option value="dark">Dark & Modern</option>
-                    <option value="pastel">Soft & Pastel</option>
-                    <option value="monochrome">Monochrome</option>
-                  </select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Auto-select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="vibrant">Vibrant & Energetic</SelectItem>
+                      <SelectItem value="calm">Calm & Professional</SelectItem>
+                      <SelectItem value="dark">Dark & Modern</SelectItem>
+                      <SelectItem value="pastel">Soft & Pastel</SelectItem>
+                      <SelectItem value="monochrome">Monochrome</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Style Reference</label>
-                  <input
-                    type="text"
+                  <Input
                     placeholder="e.g., 'Minimalist', 'Cinematic', 'Cartoon'"
                     value={formData.visualPreferences?.styleReference}
                     onChange={(e) => handleNestedChange('visualPreferences', 'styleReference', e.target.value)}
-                    className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                   />
                 </div>
               </div>
@@ -319,34 +325,40 @@ export function VideoGenerationForm({ onSubmit, isGenerating = false, progress =
                     <Music className="h-4 w-4" />
                     Voice Style
                   </label>
-                  <select
+                  <Select
                     value={formData.audioPreferences?.voiceStyle}
-                    onChange={(e) => handleNestedChange('audioPreferences', 'voiceStyle', e.target.value)}
-                    className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                    onValueChange={(value) => handleNestedChange('audioPreferences', 'voiceStyle', value)}
                   >
-                    <option value="">Auto-select</option>
-                    <option value="professional">Professional</option>
-                    <option value="casual">Casual & Friendly</option>
-                    <option value="energetic">Energetic & Enthusiastic</option>
-                    <option value="calm">Calm & Soothing</option>
-                    <option value="authoritative">Authoritative</option>
-                  </select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Auto-select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="professional">Professional</SelectItem>
+                      <SelectItem value="casual">Casual & Friendly</SelectItem>
+                      <SelectItem value="energetic">Energetic & Enthusiastic</SelectItem>
+                      <SelectItem value="calm">Calm & Soothing</SelectItem>
+                      <SelectItem value="authoritative">Authoritative</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Music Genre</label>
-                  <select
+                  <Select
                     value={formData.audioPreferences?.musicGenre}
-                    onChange={(e) => handleNestedChange('audioPreferences', 'musicGenre', e.target.value)}
-                    className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                    onValueChange={(value) => handleNestedChange('audioPreferences', 'musicGenre', value)}
                   >
-                    <option value="">No background music</option>
-                    <option value="upbeat">Upbeat & Electronic</option>
-                    <option value="corporate">Corporate & Clean</option>
-                    <option value="ambient">Ambient & Atmospheric</option>
-                    <option value="hip-hop">Hip-Hop & Urban</option>
-                    <option value="acoustic">Acoustic & Organic</option>
-                  </select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="No background music" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="upbeat">Upbeat & Electronic</SelectItem>
+                      <SelectItem value="corporate">Corporate & Clean</SelectItem>
+                      <SelectItem value="ambient">Ambient & Atmospheric</SelectItem>
+                      <SelectItem value="hip-hop">Hip-Hop & Urban</SelectItem>
+                      <SelectItem value="acoustic">Acoustic & Organic</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
