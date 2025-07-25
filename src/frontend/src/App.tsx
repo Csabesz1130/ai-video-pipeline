@@ -1,5 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import Dashboard from './pages/Dashboard';
+import GenerateVideoPage from './pages/GenerateVideo';
+import { Button } from './components/ui/button';
 import { YouTubeScriptGenerator, ScriptResponse, ScriptSection } from '../../services/script-generation/youtubeScriptGenerator';
 
 const App: React.FC = () => {
@@ -14,11 +17,14 @@ const App: React.FC = () => {
                   <h1 className="text-xl font-bold text-gray-800">AI Video Pipeline</h1>
                 </div>
                 <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                  <Link to="/" className="text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300">
-                    Home
+                  <Link to="/">
+                    <Button variant="ghost">Dashboard</Button>
                   </Link>
-                  <Link to="/script-generator" className="text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300">
-                    Script Generator
+                  <Link to="/generate">
+                    <Button variant="ghost">Create Video</Button>
+                  </Link>
+                  <Link to="/script-generator">
+                    <Button variant="ghost">Script Generator</Button>
                   </Link>
                 </div>
               </div>
@@ -28,7 +34,8 @@ const App: React.FC = () => {
 
         <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/generate" element={<GenerateVideoPage />} />
             <Route path="/script-generator" element={<ScriptGenerator />} />
           </Routes>
         </main>
